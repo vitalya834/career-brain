@@ -2,6 +2,7 @@ import argparse
 from datetime import date, datetime, timedelta, timezone
 from html import escape
 import json
+import sys
 from pathlib import Path
 import re
 from urllib.parse import urlencode, urlsplit, urlunsplit
@@ -133,7 +134,14 @@ def company_history(company, notes=None, limit=3):
     core = company_core(company)
     if len(core) < 3:
         return []
-    pattern = re.compile(r"(?<!\w)" + r"\W+".join(map(re.escape, core.split())) + r"(?!\w)", re.I)
+    flags = re.I
+    if len(core) <= 4:
+        # Short names match ordinary words ("Neu", "Alt"); accept only real acronyms, case-sensitively.
+        acronym = next((word for word in re.findall(r"\w+", company) if word.casefold() == core and word.isupper()), None)
+        if not acronym:
+            return []
+        core, flags = acronym, 0
+    pattern = re.compile(r"(?<!\w)" + r"\W+".join(map(re.escape, core.split())) + r"(?!\w)", flags)
     hits, seen = [], set()
     for path, content in (notes if notes is not None else source_notes()):
         for number, line in enumerate(content.splitlines(), 1):
@@ -234,6 +242,21 @@ def calendar_link(data):
     return "https://calendar.google.com/calendar/render?" + urlencode(params)
 
 
+def watch_banner():
+    """Health of the scheduled search, shown at the top of the dashboard."""
+    try:
+        import watch
+        state = watch.status()
+    except Exception as error:  # the dashboard must open even if the watch state is broken
+        return f'<section id="watch"><p>Автопоиск: состояние не читается ({escape(type(error).__name__)}).</p></section>'
+    marks = {"ok": "✅", "stale": "⚠", "error": "⛔", "never": "⚠"}
+    note = (state.get("last") or {}).get("note")
+    link = f' · <a href="Vault/Находки/{escape(note)}">последние находки</a>' if note else ""
+    hint = "" if state["level"] == "ok" else " Запусти «Install Daily Search.cmd» или «Run Watch.cmd»."
+    return (f'<section id="watch"><h2>Автопоиск</h2><p>{marks[state["level"]]} '
+            f'{escape(state["text"])}{escape(hint)}{link}</p></section>')
+
+
 def dashboard(live=False, extra=""):
     from documents_store import KINDS, VERSIONS
     rows = []
@@ -309,7 +332,7 @@ def dashboard(live=False, extra=""):
                               for path, _ in source_notes())
     template = (ROOT / "dashboard.template.html").read_text(encoding="utf-8")
     output = (template.replace("{{HISTORY}}", source_links).replace("{{SEARCH}}", "".join(launchers))
-              .replace("{{LIVE}}", extra)
+              .replace("{{LIVE}}", watch_banner() + extra)
               .replace("{{STAGES}}", stages)
               .replace("{{OPTIONS}}", options).replace("{{CARDS}}", "".join(rows)))
     if live:
@@ -343,6 +366,9 @@ def main():
     ats.add_argument("--cv", type=Path)
     ats.add_argument("--posting", type=Path)
     ats.add_argument("--json", action="store_true")
+    watcher = commands.add_parser("watch", help="Автопоиск: только новые вакансии, заметка в Vault/Находки")
+    watcher.add_argument("--dry-run", action="store_true", help="Показать результат, ничего не записывая")
+    watcher.add_argument("--status", action="store_true", help="Когда был последний запуск и что он нашёл")
     brief = commands.add_parser("brief")
     brief.add_argument("id")
     add = commands.add_parser("add")
@@ -383,6 +409,24 @@ def main():
         except (OSError, ValueError) as error:
             parser.error(str(error))
         print(json.dumps(report, ensure_ascii=False, indent=2) if args.json else as_markdown(report))
+        return
+
+    if args.command == "watch":
+        import watch
+        if args.status:
+            print(watch.status()["text"])
+            return
+        result = watch.run(dry_run=args.dry_run)
+        if not result["ok"]:
+            print("Автопоиск не удался: " + result["errors"][0])
+            sys.exit(1)
+        print(f"Новых вакансий: {result['new']}, к проверке: {len(result['good'])}, сбоев: {len(result['errors'])}.")
+        for job in result["good"]:
+            print(f"- {job['title']} — {job['company']} — {job['url']}")
+        if result["note"]:
+            print(f"Заметка: {result['note']}")
+        if not args.dry_run:
+            dashboard()
         return
 
     if args.command == "history":

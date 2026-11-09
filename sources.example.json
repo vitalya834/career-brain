@@ -67,5 +67,35 @@
         "Link zu GitHub oder Portfolio angeben."
       ]
     ]
+  },
+  "watch": {
+    "queries": [
+      "IT Support",
+      "Helpdesk",
+      "Anwendungsbetreuung",
+      "Systemadministrator",
+      "IT-Administrator"
+    ],
+    "places": [
+      [
+        "Köln",
+        15
+      ],
+      [
+        "Bonn",
+        15
+      ]
+    ],
+    "max_age_days": 21,
+    "stop_patterns": [
+      [
+        "\\bc1\\b|\\bc2\\b|verhandlungssicher|muttersprach",
+        "Deutsch C1+/verhandlungssicher"
+      ],
+      [
+        "(mindestens|mind\\.) ?(fünf|5|acht|8|zehn|10)[ -]?(jahre|jährige)",
+        "5+ Jahre Erfahrung gefordert"
+      ]
+    ]
   }
 }

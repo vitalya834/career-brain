@@ -53,6 +53,7 @@ python -X utf8 career.py ats ID                     # ATS-проверка по�
 python -X utf8 career.py ats --cv Lebenslauf.pdf --posting vacancy.txt --json
 python -X utf8 career.py jobspy-csv jobs.csv        # сверить выгрузку JobSpy с историей
 python -X utf8 career.py import-legacy PATH [--apply]   # импорт из job-tracker (data/jobs)
+python -X utf8 career.py watch                      # автопоиск: только новые вакансии
 python -X utf8 career.py dashboard                  # статичный Career Brain.html
 ```
 
@@ -70,6 +71,16 @@ python -X utf8 career.py dashboard                  # статичный Career 
 - **Проверка фактов** по твоим `cv_rules`.
 
 Недостающие ключевые слова — только подсказка. Добавлять их в CV можно только при реальном опыте.
+
+## Автопоиск по расписанию
+
+- **Включить (Windows):** запусти `Install Daily Search.cmd`. Он создаёт в Планировщике задачу «Career Brain Watch» на 08:30 и 14:30 и сразу делает первый запуск. Если компьютер был выключен, запуск произойдёт при включении.
+- **Разовый запуск:** `Run Watch.cmd` или `python -X utf8 career.py watch`. Проба без записи: `career.py watch --dry-run`. Linux/macOS: добавь `career.py watch` в cron.
+- **Выключить:** `Remove Daily Search.cmd`.
+- **Что делает запуск:** идёт по списку `sources.json → watch.queries × watch.places` в Arbeitsagentur, оставляет только вакансии, которых ещё не было, открывает полный текст каждой и пишет заметку `Vault/Находки/ГГГГ-ММ-ДД.md`.
+- **Как разложены находки:** «Проверить в первую очередь»; «Есть стоп-требование, агентство или истёк срок»; «Компания уже есть в журнале» со ссылкой на строку журнала.
+- **Контроль:** блок «Автопоиск» в панели и `career.py watch --status` показывают последний запуск и предупреждают, если его не было больше 36 часов. Журнал — `watch.log`.
+- **Сбои сети:** каждый запрос повторяется до трёх раз; если не ответил ни один, запуск считается неудачным, а список виденных вакансий не меняется.
 
 ## Данные и приватность
 

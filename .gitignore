@@ -8,3 +8,6 @@ __pycache__/
 *.pyc
 _backup*/
 *.tmp
+Vault/Находки/
+Vault/watch_state.json
+watch.log
