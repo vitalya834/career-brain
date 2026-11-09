@@ -1,0 +1,47 @@
+{
+  "_note": "Beispielprofil. Nur echte, belegbare Angaben eintragen.",
+  "candidate": {
+    "name": "Max Mustermann",
+    "address": "Musterstraße 1, 50667 Köln",
+    "email": "max@example.org",
+    "github": "github.com/example"
+  },
+  "languages": {
+    "german": "B2",
+    "english": "B1",
+    "native": "…"
+  },
+  "experience": [
+    {
+      "company": "Beispiel GmbH",
+      "title": "IT-Support (1st/2nd Level)",
+      "period": "01/2020 - 12/2022",
+      "bullets_verified": [
+        "Tickets im 1st/2nd Level bearbeitet.",
+        "Clients eingerichtet und Nutzer geschult.",
+        "Störungen dokumentiert."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Bachelor …",
+      "institution": "…",
+      "period": "…",
+      "recognition": "z. B. ZAB-Zeugnisbewertung, falls ausländischer Abschluss",
+      "thesis_de": "…"
+    }
+  ],
+  "training": [],
+  "skills": {
+    "it": [
+      "Windows",
+      "Netzwerk-Grundlagen",
+      "SQL-Grundlagen"
+    ]
+  },
+  "constraints": [
+    "Keine Kenntnisse erfinden.",
+    "Sprachniveau nicht höher angeben als belegt."
+  ]
+}
