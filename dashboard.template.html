@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Career Brain · Трекер</title>
+<style>
+:root {color-scheme:dark; font:15px/1.5 system-ui; background:#101521; color:#e8eef9; --line:#324058; --panel:#192438; --accent:#a1ead7}
+* {box-sizing:border-box} body {max-width:1280px;margin:0 auto;padding:0 clamp(1rem,4vw,3rem) 3rem}
+header {display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:1.25rem 0;border-bottom:1px solid var(--line)}
+nav {display:flex;flex-wrap:wrap;gap:1rem} a {color:var(--accent)} nav a {text-decoration:none;font-weight:650}
+.brand {font-size:1.2rem;font-weight:750} small,.company {color:#adbed5}
+h1 {font-size:clamp(2rem,6vw,3.6rem);margin:.1rem 0} h2,h3 {margin:.35rem 0}
+section {margin:2rem 0;scroll-margin-top:1rem} .intro {margin:2rem 0 1rem}
+.filters,.meta,.stages {display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+.stages {margin:1rem 0} .stages button[aria-pressed=true] {background:var(--accent);color:#112727;border-color:transparent}
+main {display:grid;grid-template-columns:repeat(auto-fill,minmax(min(325px,100%),1fr));gap:.85rem;margin-top:1rem}
+article, #discovery, #add-job {background:var(--panel);border:1px solid var(--line);border-radius:.8rem;padding:1rem;overflow-wrap:anywhere}
+article[hidden] {display:none} article h3 {margin:.75rem 0 .25rem} article p {white-space:pre-line}
+.badge {font-size:.8rem;background:#2c3c5b;border-radius:1rem;padding:.2rem .55rem}
+details {margin-top:.8rem} summary,button {cursor:pointer}
+input,select,button {font:inherit;padding:.43rem .6rem;max-width:100%;border:1px solid var(--line);border-radius:.45rem;background:#101827;color:inherit}
+form {display:flex;flex-wrap:wrap;gap:.4rem;margin:.75rem 0}
+</style></head><body>
+<header><div class="brand">Career Brain</div><nav aria-label="Разделы">
+<a href="#tracker">Трекер</a><a href="#discovery">Поиск</a><a id="add-nav" href="#add-job">＋ Добавить</a><a href="#knowledge">Хранилище</a>
+</nav></header>
+<section id="tracker">
+<div class="intro"><small>БОНН И РЕГИОН · ГЕРМАНИЯ · ЕВРОПА</small><h1>Вакансии и отклики</h1>
+<p>Новые возможности, отправленные заявки и собеседования.</p></div>
+<div class="stages" aria-label="Статистика по статусам">{{STAGES}}</div>
+<div class="filters">
+<input id="query" type="search" aria-label="Поиск по карточкам" placeholder="Компания, должность или навык">
+<select id="status" aria-label="Статус"><option value="">Все статусы</option>{{OPTIONS}}</select>
+<select id="source" aria-label="Источник"><option value="">Все источники</option></select>
+<select id="sort" aria-label="Сортировка"><option value="recent">По обновлению</option><option value="company">По компании</option><option value="title">По должности</option></select>
+<span id="count" aria-live="polite"></span></div>
+<main>{{CARDS}}</main>
+<p id="empty" hidden>Нет карточек с такими фильтрами.</p></section>
+{{LIVE}}
+<section id="shortcuts"><h2>Готовые поиски</h2><ul>{{SEARCH}}</ul></section>
+<section id="knowledge"><h2>Хранилище</h2><p>{{HISTORY}} · <a href="Vault/Профиль.md">Профиль поиска</a> · <a href="Vault/Подготовка отклика.md">Подготовка CV</a></p></section>
+<script>
+const query = document.querySelector('#query');
+const status = document.querySelector('#status');
+const source = document.querySelector('#source');
+const sort = document.querySelector('#sort');
+const list = document.querySelector('main');
+const cards = Array.from(list.querySelectorAll('article'));
+const stages = Array.from(document.querySelectorAll('[data-stage]'));
+const sources = [...new Set(cards.map(card => card.dataset.source))].filter(Boolean).sort();
+for (const name of sources) source.add(new Option(name, name));
+for (const button of stages) {
+  const stage = button.dataset.stage;
+  button.textContent += ' · ' + cards.filter(card => !stage || card.dataset.state === stage).length;
+  button.addEventListener('click', () => {
+    status.value = stage;
+    filter();
+  });
+}
+if (!document.querySelector('#discovery')) {
+  document.querySelector('a[href="#discovery"]').href = '#shortcuts';
+  document.querySelector('#add-nav').hidden = true;
+}
+function filter() {
+  const needle = query.value.trim().toLowerCase();
+  let visible = 0;
+  for (const card of cards) {
+    const data = card.dataset;
+    card.hidden = !data.search.toLowerCase().includes(needle) ||
+      (status.value !== '' && data.state !== status.value) ||
+      (source.value !== '' && data.source !== source.value);
+    if (!card.hidden) visible++;
+  }
+  for (const button of stages) button.setAttribute('aria-pressed', String(button.dataset.stage === status.value));
+  document.querySelector('#count').textContent = visible + ' из ' + cards.length;
+  document.querySelector('#empty').hidden = visible > 0;
+}
+function reorder() {
+  const field = sort.value;
+  cards.sort((a, b) => field === 'recent'
+    ? b.dataset.updated.localeCompare(a.dataset.updated)
+    : a.dataset[field].localeCompare(b.dataset[field]));
+  for (const card of cards) list.append(card);
+}
+query.addEventListener('input', filter);
+status.addEventListener('change', filter);
+source.addEventListener('change', filter);
+sort.addEventListener('change', reorder);
+reorder();
+filter();
+</script>
+</body></html>

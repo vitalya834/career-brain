@@ -1,0 +1,10 @@
+# personal data stays local
+sources.json
+Vault/Вакансии/*.md
+Vault/Документы/*
+!Vault/Документы/.gitkeep
+Career Brain.html
+__pycache__/
+*.pyc
+_backup*/
+*.tmp

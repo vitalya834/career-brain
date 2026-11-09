@@ -1,0 +1,71 @@
+{
+  "history": "examples/history",
+  "history_files": [
+    "Applications Log.md",
+    "Companies.md"
+  ],
+  "additional_history": [],
+  "candidate_profile": "examples/candidate_profile.example.json",
+  "employer_boards": {},
+  "search_presets": [
+    [
+      "IT-Support",
+      "IT Support | Anwendungsbetreuung | Helpdesk",
+      "Köln | Bonn",
+      "all"
+    ],
+    [
+      "Systemadministration",
+      "Systemadministrator | IT Administrator",
+      "Köln | Bonn",
+      "arbeitsagentur"
+    ],
+    [
+      "Industrie-IT",
+      "SCADA | Leitsystem | Automatisierung",
+      "Köln | Bonn",
+      "arbeitsagentur"
+    ],
+    [
+      "Breite Suche Deutschland",
+      "IT Support | Servicetechniker",
+      "Köln | Bonn",
+      "work-in-germany"
+    ]
+  ],
+  "queries": [
+    [
+      "IT-Support, Köln",
+      "IT Support",
+      "Köln"
+    ],
+    [
+      "Anwendungsbetreuung, Bonn",
+      "Anwendungsbetreuung",
+      "Bonn"
+    ]
+  ],
+  "cv_rules": {
+    "photo": "",
+    "fact_guards": [
+      [
+        "deutsch\\W{0,3}(c1|c2)\\b",
+        "Beispiel: Deutschniveau im CV stimmt nicht mit dem Profil (B2) überein."
+      ],
+      [
+        "masterabschluss|m\\.\\s?sc\\.",
+        "Beispiel: Master wurde nicht abgeschlossen."
+      ]
+    ],
+    "should_mention": [
+      [
+        "bachelorarbeit|abschlussarbeit",
+        "Abschlussarbeit mit Thema erwähnen."
+      ],
+      [
+        "github|portfolio",
+        "Link zu GitHub oder Portfolio angeben."
+      ]
+    ]
+  }
+}
